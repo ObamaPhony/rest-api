@@ -1,0 +1,23 @@
+# Glide YAML configuration file
+package: github.com/ObamaPhony/rest-api
+
+# Declare your project's dependencies.
+import:
+    # Configuration wrapper, possible easier configuration, depends.
+    - package: github.com/spf13/viper
+    # Logging package, backwards compatible with the standard Go logger.
+    - package: github.com/Sirupsen/logrus 
+    # For the REST API.
+    - package: github.com/gin-gonic/gin
+    # For the REST API's abillity to log to Logrus.
+    - package: github.com/gin-gonic/contrib/ginrus 
+    # Easier piping!
+    - package: gopkg.in/pipe.v2
+    # Importing the subpackages for this project.
+    - package: github.com/ObamaPhony/rest-api/controllers
+    # Importing the subpackages for this project.
+    - package: github.com/ObamaPhony/rest-api/config
+    # Importing the subpackages for this project.
+    - package: github.com/ObamaPhony/rest-api/models
+    # Importing the subpackages for this project.
+    - package: github.com/ObamaPhony/rest-api/exec
