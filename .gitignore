@@ -1,0 +1,4 @@
+# Ignore binary
+rest-api
+# Ignore Glide's _vendor directory, save the VCS.
+_vendor
