@@ -37,36 +37,32 @@ func init() {
 }
 
 func main() {
-	var w sync.WaitGroup
+	/** I want to seperate the following into a subpackage at some point! **/
+	/** For now keeping it here for reference and to showcase my async. **/
+	var wg sync.WaitGroup
 
-	chanbufferspeech := make(chan *bytes.Buffer, 1)
-	chanerrorspeech := make(chan error, 1)
-	chandonespeech := make(chan bool, 1)
+	chanSpeechBytesBuffer := make(chan *bytes.Buffer) // Create a channel for the bytes Buffer from the Python natural language processor/function.
+	chanSpeechError := make(chan error)               // Create a channel for errors returned from the Python natural language processor/function.
 
-	chandonerest := make(chan bool, 1)
+	chanRESTError := make(chan error) // Create a channel for errors returned from the REST server.
 
-	w.Add(2)
+	wg.Add(2)
 
-	go exec.SpeechAnalysis(chanbufferspeech, chanerrorspeech, chandonespeech, true, &w, "", "")
-	go controllers.StartServer(":8080", chandonerest, &w)
+	go exec.SpeechAnalysis(chanSpeechBytesBuffer, chanSpeechError, false, &wg, "", "")
+	go controllers.StartServer(":8080", &wg, chanRESTError)
 
-	chanbufferspeechResult := <-chanbufferspeech
-	chanerrorspeechResult := <-chanerrorspeech
-	chandonespeechResult := <-chandonespeech
-	chandonerestResult := <-chandonerest
-
-	if chanerrorspeechResult != nil {
-		panic(chanerrorspeechResult)
+	// SpeechBytesBufferResult := <-chanSpeechBytesBuffer // Don't need this.. for now.
+	SpeechErrorResult := <-chanSpeechError
+	if SpeechErrorResult != nil {
+		panic(SpeechErrorResult)
 	}
 
-	if chandonerestResult == false {
-		fmt.Println("rest not done yet.")
+	RESTErrorResult := <-chanRESTError
+	if RESTErrorResult != nil {
+		panic(RESTErrorResult)
 	}
 
-	if chandonespeechResult == false {
-		fmt.Println("speech not done yet.")
-	}
+	wg.Wait()
 
-	fmt.Println(chanbufferspeechResult.String())
-	w.Wait()
+	fmt.Println("Finished?")
 }

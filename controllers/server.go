@@ -9,12 +9,10 @@ import (
 	"time"
 )
 
-func StartServer(hostname string, quit chan bool, wg *sync.WaitGroup) error {
-	done := make(chan bool) // Create a done channel of bool type to return when the Server is finished.
+func StartServer(hostname string, wg *sync.WaitGroup, chanErrorResult chan error) {
+	r := gin.Default() // Create a instance of Gin.
 
-	r := gin.Default() // Create a instance of Gin
-
-	r.Use(ginrus.Ginrus(logrus.StandardLogger(), time.RFC3339, true))
+	r.Use(ginrus.Ginrus(logrus.StandardLogger(), time.RFC3339, true)) // Use the Ginrus middleware logger.
 
 	v1 := r.Group("api/v1")
 	{
@@ -23,13 +21,10 @@ func StartServer(hostname string, quit chan bool, wg *sync.WaitGroup) error {
 
 	err := r.Run(hostname)
 	if err != nil {
-		done <- true
+		chanErrorResult <- err
 		wg.Done()
-		return err
 	}
 
-	done <- true
+	chanErrorResult <- nil
 	wg.Done()
-
-	return nil
 }
