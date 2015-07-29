@@ -2,12 +2,13 @@ package exec
 
 import (
 	"bytes"
+	"fmt"
 	"gopkg.in/pipe.v2"
 )
 
+// SpeechAnalysis does this
 func SpeechAnalysis(cb1 chan *bytes.Buffer, ce1 chan error, file bool) {
-	cb1 = make(chan *bytes.Buffer, 1)
-	ce1 = make(chan error, 1)
+	fmt.Println("START")
 
 	println("starting")
 	if file == true {
@@ -54,13 +55,11 @@ func SpeechAnalysis(cb1 chan *bytes.Buffer, ce1 chan error, file bool) {
 			// and a channel with the error value.
 			cb1 <- b
 			ce1 <- err
-			return
 		} else {
 			// If no error detected, send back buffer instance and nil error value.
 			cb1 <- b
 			ce1 <- nil
 			println("written")
-			return
 		}
 
 	}

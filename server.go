@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 	// "github.com/ObamaPhony/rest-api/controllers"
-	"github.com/ObamaPhony/rest-api/exec"
+	obexec "github.com/ObamaPhony/rest-api/exec"
 )
 
 func main() {
@@ -15,7 +15,7 @@ func main() {
 		cb1 := make(chan *bytes.Buffer)
 		ce1 := make(chan error)
 
-		exec.SpeechAnalysis(cb1, ce1, true)
+		obexec.SpeechAnalysis(cb1, ce1, true)
 
 		x := <-cb1
 		y := <-ce1
