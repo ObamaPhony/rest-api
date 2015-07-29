@@ -1,11 +1,5 @@
 # Glide YAML configuration file
 package: github.com/ObamaPhony/rest-api
-ref: async
-subpackages:
-    - controllers
-    - config
-    - models
-    - exec
 
 # Declare your project's dependencies.
 import:
@@ -19,3 +13,12 @@ import:
     - package: github.com/gin-gonic/contrib/ginrus 
     # Easier piping!
     - package: gopkg.in/pipe.v2
+    # rest-api
+    - package: github.com/ObamaPhony/rest-api
+        vcs: git
+        ref: async
+        subpackages:
+            - controllers
+            - config
+            - exec
+            - models
