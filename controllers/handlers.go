@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"github.com/ObamaPhony/obama-rest-api/models"
+	"github.com/ObamaPhony/rest-api/models"
 	"github.com/gin-gonic/gin"
 )
 

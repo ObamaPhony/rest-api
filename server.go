@@ -1,30 +1,50 @@
 package main
 
 import (
-	// "fmt"
-	"github.com/ObamaPhony/obama-rest-api/controllers"
-	// oexec "github.com/ObamaPhony/obama-rest-api/exec"
-	// "gopkg.in/pipe.v2"
-	// "os"
-	// "os/exec"
-	// "github.com/ObamaPhony/obama-rest-api/exec"
+	"bytes"
+	"fmt"
+	"os"
+	// "github.com/ObamaPhony/rest-api/controllers"
+	"github.com/ObamaPhony/rest-api/exec"
 )
 
 func main() {
 
-	// TODO: Branch off, and refine the async system - possibly create a module.
-	// go func() {
-	// 	p := pipe.Line(
-	// 		pipe.ReadFile("./test-speeches.txt"),
-	// 		pipe.Exec("../speech-analysis/analyse-speeches.py"),
-	// 	)
+	go func() {
 
-	// 	output, err := pipe.CombinedOutput(p)
-	// 	if err != nil {
-	// 		panic(err)
-	// 	}
-	// 	fmt.Printf("%s", output)
-	// }()
+		cb1 := make(chan *bytes.Buffer)
+		ce1 := make(chan error)
 
-	controllers.StartServer(":8080")
+		exec.SpeechAnalysis(cb1, ce1, true)
+
+		x := <-cb1
+		y := <-ce1
+
+		if y != nil {
+			panic(y)
+		}
+		result := x.String()
+		fmt.Println(result)
+
+		f, err := os.Create("./output.json")
+		if err != nil {
+			panic(err)
+		}
+		defer f.Close()
+
+		wr1, err := f.Write(x.Bytes())
+		if err != nil {
+			panic(err)
+		}
+		fmt.Printf("Wrote %d bytes\n", wr1)
+
+		f.Sync()
+
+		if err != nil {
+			panic(err)
+		}
+
+	}()
+
+	// controllers.StartServer(":8080")
 }
