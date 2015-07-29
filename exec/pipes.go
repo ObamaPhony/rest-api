@@ -2,28 +2,26 @@ package exec
 
 import (
 	"bytes"
-	"fmt"
 	"gopkg.in/pipe.v2"
+	"sync"
 )
 
-// SpeechAnalysis does this
-func SpeechAnalysis(cb1 chan *bytes.Buffer, ce1 chan error, file bool) {
-	fmt.Println("START")
-
-	println("starting")
-	if file == true {
-		println("true")
+// SpeechAnalysis does takes three channels, one to return the buffer, one to return any errors and another to let the calling function know when it's done.
+// It also takes a bool variable to signify if we are writing to file from the output of the python script as well as to a variable.
+func SpeechAnalysis(cb1 chan *bytes.Buffer, ce1 chan error, done chan bool, file bool, wg *sync.WaitGroup, speechlocationFile string, speechlocationVar string) {
+	switch file {
+	// A true
+	case true:
 		// Initalize the buffer struct.
 		b := &bytes.Buffer{}
 
 		// Create a Pipe instance to pipe to the speech-analysis module.
 		p := pipe.Line(
-			pipe.ReadFile("./test-speeches.txt"),                                                                                                  // TODO: Probs should look at functions arguments for this.
-			pipe.Exec("python", "/data1/_NASDrive/dzrodrig/Documents/dev/projects/src/github.com/ObamaPhony/speech-analysis/analyse-speeches.py"), // The full path should be changed in production!
+			pipe.ReadFile("./test-speeches.txt"),                                                 // TODO: Probs should look at functions arguments for this.
+			pipe.Exec("python", "/home/dzrodrig/ObamaPhony/speech-analysis/analyse-speeches.py"), // The full path should be changed in production!
 			pipe.Tee(b),                          // Output to the 'b' buffer.
 			pipe.WriteFile("results.json", 0644), // Also output to the file, we want that to happen!
 		)
-
 		// Run the Pipe instance.
 		err := pipe.Run(p)
 		// Error handling for the win.
@@ -32,15 +30,16 @@ func SpeechAnalysis(cb1 chan *bytes.Buffer, ce1 chan error, file bool) {
 			// and a channel with the error value.
 			cb1 <- b
 			ce1 <- err
+			wg.Done()
+			done <- true
 		} else {
 			// If no error detected, send back buffer instance and nil error value.
 			cb1 <- b
 			ce1 <- nil
-			println("written.")
+			wg.Done()
+			done <- true
 		}
-
-	} else if file == false {
-		println("false")
+	case false:
 		// If the file bool is false, we shouldn't write to a file, and just to the buffer and return it.
 		b := &bytes.Buffer{}
 		p := pipe.Line(
@@ -55,13 +54,14 @@ func SpeechAnalysis(cb1 chan *bytes.Buffer, ce1 chan error, file bool) {
 			// and a channel with the error value.
 			cb1 <- b
 			ce1 <- err
+			wg.Done()
+			done <- true
 		} else {
 			// If no error detected, send back buffer instance and nil error value.
 			cb1 <- b
 			ce1 <- nil
-			println("written")
+			wg.Done()
+			done <- true
 		}
-
 	}
-
 }

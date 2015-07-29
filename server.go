@@ -3,48 +3,70 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"github.com/ObamaPhony/rest-api/config"
+	"github.com/ObamaPhony/rest-api/controllers"
+	"github.com/ObamaPhony/rest-api/exec"
+	"github.com/spf13/viper"
 	"os"
-	// "github.com/ObamaPhony/rest-api/controllers"
-	obexec "github.com/ObamaPhony/rest-api/exec"
+	"sync"
 )
 
+var Config *viper.Viper
+
+func init() {
+	var err error
+
+	OREST_CONFIGPATH := os.Getenv("OREST_CONFIGPATH")
+	OREST_CONFIGNAME := os.Getenv("OREST_CONFIGNAME")
+	// Test if the ENV variables are empty, if so spontaneously die.
+
+	if len(OREST_CONFIGNAME) == 0 {
+		fmt.Printf("The OREST_CONFIGNAME environment variable is NOT found. The REST API cannot continue, *shoots in the head*\n") // Possibly not PG at all.
+		panic("No ENV.")
+	}
+
+	if len(OREST_CONFIGPATH) == 0 {
+		fmt.Printf("The OREST_CONFIGPATH environment variable is NOT found. The REST API cannot continue, *shoots in the head*\n") // Possibly not PG at all.
+		panic("No ENV.")
+	}
+
+	Config, err = config.GetViper(os.Getenv("OREST_CONFIGPATH"), os.Getenv("OREST_CONFIGNAME"))
+	if err != nil {
+		fmt.Printf("Error found when initalizing the configuration instance. Error message: %s\n. Cannot continue, *shoots in the head*"+" Error message: %s\n", err)
+	}
+}
+
 func main() {
+	var w sync.WaitGroup
 
-	go func() {
+	chanbufferspeech := make(chan *bytes.Buffer, 1)
+	chanerrorspeech := make(chan error, 1)
+	chandonespeech := make(chan bool, 1)
 
-		cb1 := make(chan *bytes.Buffer)
-		ce1 := make(chan error)
+	chandonerest := make(chan bool, 1)
 
-		obexec.SpeechAnalysis(cb1, ce1, true)
+	w.Add(2)
 
-		x := <-cb1
-		y := <-ce1
+	go exec.SpeechAnalysis(chanbufferspeech, chanerrorspeech, chandonespeech, true, &w, "", "")
+	go controllers.StartServer(":8080", chandonerest, &w)
 
-		if y != nil {
-			panic(y)
-		}
-		result := x.String()
-		fmt.Println(result)
+	chanbufferspeechResult := <-chanbufferspeech
+	chanerrorspeechResult := <-chanerrorspeech
+	chandonespeechResult := <-chandonespeech
+	chandonerestResult := <-chandonerest
 
-		f, err := os.Create("./output.json")
-		if err != nil {
-			panic(err)
-		}
-		defer f.Close()
+	if chanerrorspeechResult != nil {
+		panic(chanerrorspeechResult)
+	}
 
-		wr1, err := f.Write(x.Bytes())
-		if err != nil {
-			panic(err)
-		}
-		fmt.Printf("Wrote %d bytes\n", wr1)
+	if chandonerestResult == false {
+		fmt.Println("rest not done yet.")
+	}
 
-		f.Sync()
+	if chandonespeechResult == false {
+		fmt.Println("speech not done yet.")
+	}
 
-		if err != nil {
-			panic(err)
-		}
-
-	}()
-
-	// controllers.StartServer(":8080")
+	fmt.Println(chanbufferspeechResult.String())
+	w.Wait()
 }
