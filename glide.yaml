@@ -13,6 +13,8 @@ import:
     - package: github.com/gin-gonic/contrib/ginrus 
     # Easier piping!
     - package: gopkg.in/pipe.v2
+    # BoltDB (k:v)
+    - package: github.com/boltdb/bolt
     # rest-api
     - package: github.com/ObamaPhony/rest-api
         vcs: git
@@ -22,3 +24,4 @@ import:
             - config
             - exec
             - models
+            - db
