@@ -25,3 +25,4 @@ import:
             - exec
             - models
             - db
+    - package: gopkg.in/mgo.v2
