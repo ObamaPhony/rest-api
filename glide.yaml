@@ -25,4 +25,5 @@ import:
             - exec
             - models
             - db
-    - package: labix.org/v2/mgo
+    - package: gopkg.in/mgo.v2
+    - package: github.com/jeffail/gabs
