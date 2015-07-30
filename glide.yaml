@@ -26,3 +26,4 @@ import:
             - models
             - db
     - package: gopkg.in/mgo.v2
+    - package: github.com/jeffail/gabs
