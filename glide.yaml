@@ -18,7 +18,7 @@ import:
     # rest-api
     - package: github.com/ObamaPhony/rest-api
         vcs: git
-        ref: async
+        ref: master
         subpackages:
             - controllers
             - config
