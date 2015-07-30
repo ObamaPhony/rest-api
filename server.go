@@ -6,38 +6,61 @@ import (
 	"github.com/ObamaPhony/rest-api/config"
 	"github.com/ObamaPhony/rest-api/controllers"
 	"github.com/ObamaPhony/rest-api/exec"
+	"github.com/ObamaPhony/rest-api/models"
+	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/viper"
 	"os"
 	"sync"
 )
 
+// Global Configuration file.
 var Config *viper.Viper
+
+// Loggers
+var LogBase *log.Entry
+var LogConfig *log.Entry
+var LogControllers *log.Entry
+var LogExec *log.Entry
+var LogSpeech *log.Entry
 
 func init() {
 	var err error
 
-	OREST_CONFIGPATH := os.Getenv("OREST_CONFIGPATH")
-	OREST_CONFIGNAME := os.Getenv("OREST_CONFIGNAME")
+	// Fill in the logger instances into the variables previously definewd.
+	LogBase = models.ReturnBaseLogger()
+	LogConfig = models.ReturnLogConfig()
+	LogControllers = models.ReturnLogControllers()
+	LogExec = models.ReturnLogExec()
+	LogSpeech = models.ReturnLogSpeech()
+
+	// Define the environment variables.
+	orestCONFIGPATH := os.Getenv("orestCONFIGPATH")
+	orestCONFIGNAME := os.Getenv("orestCONFIGNAME")
+
 	// Test if the ENV variables are empty, if so spontaneously die.
 
-	if len(OREST_CONFIGNAME) == 0 {
-		fmt.Printf("The OREST_CONFIGNAME environment variable is NOT found. The REST API cannot continue, *shoots in the head*\n") // Possibly not PG at all.
+	if len(orestCONFIGNAME) == 0 {
+		fmt.Printf("The orestCONFIGNAME environment variable is NOT found. The REST API cannot continue, *shoots in the head*\n") // Possibly not PG at all.
 		panic("No ENV.")
 	}
 
-	if len(OREST_CONFIGPATH) == 0 {
-		fmt.Printf("The OREST_CONFIGPATH environment variable is NOT found. The REST API cannot continue, *shoots in the head*\n") // Possibly not PG at all.
+	if len(orestCONFIGPATH) == 0 {
+		fmt.Printf("The orestCONFIGPATH environment variable is NOT found. The REST API cannot continue, *shoots in the head*\n") // Possibly not PG at all.
 		panic("No ENV.")
 	}
 
-	Config, err = config.GetViper(os.Getenv("OREST_CONFIGPATH"), os.Getenv("OREST_CONFIGNAME"))
+	Config, err = config.GetViper(orestCONFIGPATH, orestCONFIGNAME)
 	if err != nil {
 		fmt.Printf("Error found when initalizing the configuration instance. Error message: %s\n. Cannot continue, *shoots in the head*"+" Error message: %s\n", err)
 	}
+
+	LogConfig.Info("Loaded the configuration instance.")
+	LogBase.Info("Seems OK, deploying REST server.")
+
 }
 
 func main() {
-	/** I want to seperate the following into a subpackage at some point! **/
+	/** I want to separate the following into a subpackage at some point! **/
 	/** For now keeping it here for reference and to showcase my async. **/
 	var wg sync.WaitGroup
 
@@ -63,6 +86,4 @@ func main() {
 	}
 
 	wg.Wait()
-
-	fmt.Println("Finished?")
 }
