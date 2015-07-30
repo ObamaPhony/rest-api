@@ -25,3 +25,4 @@ import:
             - exec
             - models
             - db
+    - package: labix.org/v2/mgo
