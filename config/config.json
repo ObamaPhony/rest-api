@@ -1,8 +1,12 @@
 {
     "version":"0.01a",
+    "server": {
+	    "listenAddr":"127.0.0.1",
+	    "listenPort":":8092"
+    },
     "speech": {
-        "fileOutput":false,
-        "fileOutputPath":"../results.json",
-        "stdOutput":true
+        "fileOutput":true,
+	"fileOutputPath":"/home/dzrodrig/dev/projects/src/github.com/ObamaPhony/rest-api/data/speechOutput/",
+        "pythonLocation":"/home/dzrodrig/dev/projects/src/github.com/ObamaPhony/speech-analysis/analyse-speeches.py"
     }
 }
