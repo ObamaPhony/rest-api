@@ -1,4 +1,5 @@
-# Ignore binary
+# Ignore binary generated
 rest-api
-# Ignore Glide's _vendor directory, save the VCS.
-_vendor
+
+# Ignore JSON files in the data directory
+data/*.json
