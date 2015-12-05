@@ -1,51 +1,59 @@
 package models
 
 import (
-	log "github.com/Sirupsen/logrus"
-	"github.com/jeffail/gabs"
+	log "github.com/mgutz/logxi/v1"
+	"gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
 )
 
-var LogObamaREST = log.WithFields(log.Fields{"App": "ObamaPhony/REST"})
-
-var (
-	LogConfig      = LogObamaREST.WithFields(log.Fields{"Module": "/Config"})
-	LogControllers = LogObamaREST.WithFields(log.Fields{"Module": "/Controllers"})
-	LogExec        = LogObamaREST.WithFields(log.Fields{"Module": "/Exec"})
-	LogSpeech      = LogObamaREST.WithFields(log.Fields{"Module": "/Exec/Speech"})
-)
-
-type SpeechesList struct {
-	ID       int        `json:"id"`
-	name     string     `json:"name"`
-	analysis [][]string `json:"analysis"`
+// SpeechJSON is a struct defining the structure of each speech
+type SpeechJSON struct {
+	ID       bson.ObjectId `json:"id" bson:"_id"`
+	Name     string        `json:"name" bson:"name"`
+	Title    string        `json:"title" bson:"title"`
+	Analysis string        `json:"analysis" bson:"analysis"`
 }
 
-func ReturnBaseLogger() *log.Entry {
-	return LogObamaREST
+// ErrorJSON d
+type ErrorJSON struct {
+	Status int   `json:"status"`
+	Error  error `json:"error"`
 }
 
-func ReturnLogConfig() *log.Entry {
-	return LogConfig
+// Loggers is a struct defining the structure of loggers.
+type Loggers struct {
+	LogBase        log.Logger
+	LogConfig      log.Logger
+	LogControllers log.Logger
+	LogExec        log.Logger
+	LogDB          log.Logger
+	LogModels      log.Logger
 }
 
-func ReturnLogControllers() *log.Entry {
-	return LogControllers
-}
-
-func ReturnLogExec() *log.Entry {
-	return LogExec
-}
-
-func ReturnLogSpeech() *log.Entry {
-	return LogSpeech
-}
-
-func GABSParseJSON(json []byte) (*gabs.Container, error) {
-	jsonParsed, err := gabs.ParseJSON(json)
-	if err != nil {
-		return jsonParsed, err
+// ReturnLoggers returns the Loggers struct with initalized loggers.
+func ReturnLoggers() Loggers {
+	loggers := Loggers{
+		LogBase:        log.New("REST/Base"),
+		LogConfig:      log.New("REST/Config"),
+		LogControllers: log.New("REST/Controllers"),
+		LogExec:        log.New("REST/Exec"),
+		LogDB:          log.New("REST/DB"),
+		LogModels:      log.New("REST/Models"),
 	}
 
-	// No errors, we're good here.
-	return jsonParsed, nil
+	return loggers
+}
+
+// GetMongo returns a MongoDB session after connecting to the database.
+func GetMongo(hostname string, monotonic bool) (*mgo.Session, error) {
+	session, err := mgo.Dial(hostname)
+	if err != nil {
+		return session, err
+	}
+
+	defer session.Close()
+
+	session.SetMode(mgo.Monotonic, monotonic)
+
+	return session, nil
 }
