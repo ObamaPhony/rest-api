@@ -1,0 +1,15 @@
+{
+    "version": "0.1.0",
+    "speech-generator": {
+        "basePath": "/path/to/speech-generator"
+    },
+    "speech-analysis": {
+        "basePath": "/path/to/speech-analysis"
+    },
+    "listener": {
+        "http": {
+            "port": 8080,
+            "bind": "0.0.0.0"
+        }
+    }
+}
